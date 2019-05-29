@@ -34,3 +34,7 @@ test/libvirt/terraform/.terraform
 *.tfstate
 *.tfstate.backup
 test/libvirt/inventory.txt
+
+*.tfvars
+lock.json
+password
