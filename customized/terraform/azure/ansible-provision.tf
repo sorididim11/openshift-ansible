@@ -67,8 +67,8 @@ openshift_deployment_type=origin
 openshift_disable_check=disk_availability,docker_storage,memory_availability
 
 openshift_cloudprovider_kind=azure
-openshift_cloudprovider_azure_client_id=${var.client_secret}
-openshift_cloudprovider_azure_client_secret=${var.client_id}
+openshift_cloudprovider_azure_client_id=${var.client_id}
+openshift_cloudprovider_azure_client_secret=${var.client_secret}
 openshift_cloudprovider_azure_tenant_id=${var.tenant_id}
 openshift_cloudprovider_azure_subscription_id=${var.subscription_id}
 openshift_cloudprovider_azure_resource_group=${var.group_name}
@@ -84,38 +84,45 @@ ${join("\n",azurerm_virtual_machine.k8s-master-vm.*.name)}
 
 # host group for nodes, includes region info
 [nodes]
-${join("\n",formatlist("%s openshift_node_group_name=node-config-master", azurerm_virtual_machine.k8s-master-vm.*.name)}
-${join("\n",formatlist("%s openshift_node_group_name='node-config-compute'", azurerm_virtual_machine.k8s-node-vm.*.name)}
+${join("\n",formatlist("%s openshift_node_group_name=node-config-master-infra", azurerm_virtual_machine.k8s-master-vm.*.name))}
+${join("\n",formatlist("%s openshift_node_group_name='node-config-compute'", azurerm_virtual_machine.k8s-node-vm.*.name))}
 EOF
 
 }
 
-# resource "null_resource" "k8s_build_cluster" {
-#   count = 1
-#   depends_on = ["local_file.ansible_inventory"]
-#   triggers = {
-#     content = "${local_file.ansible_inventory.content}"
-#   }
-#   connection {
-#       user = "${var.admin_username}"
-#       host = "${azurerm_public_ip.k8s-master-publicip.ip_address}"
-#       port =  "2221"
-#       private_key = "${tls_private_key.ansible_key.private_key_pem}"
-#   }
-# # copy host file to ansible host, master[0]
-#   provisioner "file" {
-#     source      = "${var.ansible_inventory_home}/hosts"
-#     destination = "/home/${var.admin_username}/openshift-ansible/inventory/azure/hosts"
-#   }
+resource "null_resource" "openshift_build_cluster" {
+  count = 1
+  depends_on = ["local_file.ansible_inventory"]
+  triggers = {
+    content = "${local_file.ansible_inventory.content}"
+  }
+  connection {
+      user = "${var.admin_username}"
+      host = "${azurerm_public_ip.k8s-master-publicip.ip_address}"
+      port =  "2221"
+      private_key = "${tls_private_key.ansible_key.private_key_pem}"
+  }
+# copy host file to ansible host, master[0]
+  provisioner "file" {
+    source      = "${var.ansible_inventory_home}/hosts"
+    destination = "/home/${var.admin_username}/openshift-ansible/inventory/hosts"
+  }
 
-# # copy private key to master[0] for ansible
-#   provisioner "remote-exec" {
-#     inline = [ "ANSIBLE_CONFIG=openshift-ansible/inventory/azure/ansible.cfg ansible-playbook openshift-ansible/customized/site.yml --become"]
-#   }
+  provisioner "file" {
+    source      = "${var.ansible_inventory_home}/../ansible.cfg"
+    destination = "/home/${var.admin_username}/openshift-ansible/ansible.cfg"
+  }
+# copy private key to master[0] for ansible
+  provisioner "remote-exec" {
+    inline = [ 
+      "ansible-playbook openshift-ansible/playbooks/prerequisites.yml",
+      "ansible-playbook openshift-ansible/playbooks/deploy_cluster.yml"
+    ]
+  }
 
-#   # provisioner "remote-exec" {
-#   #   when    = "destroy"
-#   #   inline = ["ANSIBLE_CONFIG=k8s-kubespray/inventory/azure/ansible.cfg ansible-playbook --extra-vars is_register=false --vault-password-file=k8s-kubespray/password k8s-kubespray/customized/util-redhat-subscription.yml --become"]
-#   # }
+  # provisioner "remote-exec" {
+  #   when    = "destroy"
+  #   inline = ["ANSIBLE_CONFIG=k8s-kubespray/inventory/azure/ansible.cfg ansible-playbook --extra-vars is_register=false --vault-password-file=k8s-kubespray/password k8s-kubespray/customized/util-redhat-subscription.yml --become"]
+  # }
   
-# }
+}
