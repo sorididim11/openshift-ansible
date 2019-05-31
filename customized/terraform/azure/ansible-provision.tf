@@ -64,6 +64,7 @@ etcd
 ansible_ssh_user=${var.admin_username}
 ansible_become=true
 openshift_deployment_type=origin
+openshift_disable_check=disk_availability,docker_storage,memory_availability
 
 openshift_cloudprovider_kind=azure
 openshift_cloudprovider_azure_client_id=${var.client_secret}
