@@ -108,10 +108,6 @@ resource "null_resource" "openshift_build_cluster" {
     destination = "/home/${var.admin_username}/openshift-ansible/inventory/hosts"
   }
 
-  provisioner "file" {
-    source      = "${var.ansible_inventory_home}/../ansible.cfg"
-    destination = "/home/${var.admin_username}/openshift-ansible/ansible.cfg"
-  }
 # copy private key to master[0] for ansible
   provisioner "remote-exec" {
     inline = [ 
