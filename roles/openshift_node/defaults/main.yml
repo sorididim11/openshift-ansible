@@ -45,7 +45,6 @@ openshift_node_syscon_add_mounts_l: []
 
 default_r_openshift_node_image_prep_packages:
 - "{{ openshift_service_type }}-node"
-- ansible
 - bash-completion
 - dnsmasq
 - ntp
