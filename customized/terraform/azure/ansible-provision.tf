@@ -39,58 +39,55 @@ resource "null_resource" "ansible_host_provision" {
     inline = [ 
       "chmod 600 /home/${var.admin_username}/.ssh/id_rsa",
       #"sudo rpm -ivh http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm", 
-      "sudo yum install  -y git python-devel", 
+      "sudo yum install  -y git python-devel gcc", 
       "wget https://bootstrap.pypa.io/get-pip.py && sudo python get-pip.py 'pip==9.0.3' ",
       "git clone https://github.com/sorididim11/openshift-ansible",
-      "cd openshift-ansible && git checkout v3.11",
+      "cd openshift-ansible && git checkout kin",
       "sudo pip install  -r  requirements.txt"
     ]
   }
-
-
-
-# resource "local_file" "ansible_inventory" {
-#   depends_on = ["azurerm_virtual_machine.k8s-master-vm", "azurerm_virtual_machine.k8s-node-vm", "null_resource.ansible_host_provision"]
-#   filename = "../../../inventory/azure/hosts"
-#   content =  <<EOF
-# ${join("\n", formatlist("%s ansible_host=%s ip=%s", azurerm_virtual_machine.k8s-master-vm.*.name , azurerm_network_interface.k8s-master-nic.*.private_ip_address, azurerm_network_interface.k8s-master-nic.*.private_ip_address))}
-# ${join("\n", formatlist("%s ansible_host=%s ip=%s", azurerm_virtual_machine.k8s-node-vm.*.name, azurerm_network_interface.k8s-slave-nic.*.private_ip_address, azurerm_network_interface.k8s-slave-nic.*.private_ip_address ))}
-
-# [OSEv3:children]
-# masters
-# nodes
-# etcd
-
-# [OSEv3:vars]
-# ansible_ssh_user=${var.admin_username}
-# ansible_become=true
-# openshift_deployment_type=origin
-
-# openshift_cloudprovider_kind=azure
-# openshift_cloudprovider_azure_client_id=${var.client_secret}
-# openshift_cloudprovider_azure_client_secret=${var.client_id}
-# openshift_cloudprovider_azure_tenant_id=${var.tenant_id}
-# openshift_cloudprovider_azure_subscription_id=${var.subscription_id}
-# openshift_cloudprovider_azure_resource_group=${var.group_name}
-# openshift_cloudprovider_azure_location=${var.location}
-
-# # host group for masters
-# [masters]
-# ${join("\n",azurerm_virtual_machine.k8s-master-vm.*.name )}
-
-# # host group for etcd
-# [etcd]
-# ${join("\n",azurerm_virtual_machine.k8s-master-vm.*.name)}
-
-# # host group for nodes, includes region info
-# [nodes]
-# ${join("\n",formatlist("%s openshift_node_group_name=node-config-master", azurerm_virtual_machine.k8s-master-vm.*.name)}
-# ${join("\n",formatlist("%s openshift_node_group_name='node-config-compute'", azurerm_virtual_machine.k8s-node-vm.*.name)}
-
-
-# EOF
 }
 
+resource "local_file" "ansible_inventory" {
+  depends_on = ["azurerm_virtual_machine.k8s-master-vm", "azurerm_virtual_machine.k8s-node-vm", "null_resource.ansible_host_provision"]
+  filename = "../../../inventory/hosts"
+  content =  <<EOF
+${join("\n", formatlist("%s ansible_host=%s ip=%s", azurerm_virtual_machine.k8s-master-vm.*.name , azurerm_network_interface.k8s-master-nic.*.private_ip_address, azurerm_network_interface.k8s-master-nic.*.private_ip_address))}
+${join("\n", formatlist("%s ansible_host=%s ip=%s", azurerm_virtual_machine.k8s-node-vm.*.name, azurerm_network_interface.k8s-slave-nic.*.private_ip_address, azurerm_network_interface.k8s-slave-nic.*.private_ip_address ))}
+
+[OSEv3:children]
+masters
+nodes
+etcd
+
+[OSEv3:vars]
+ansible_ssh_user=${var.admin_username}
+ansible_become=true
+openshift_deployment_type=origin
+
+openshift_cloudprovider_kind=azure
+openshift_cloudprovider_azure_client_id=${var.client_secret}
+openshift_cloudprovider_azure_client_secret=${var.client_id}
+openshift_cloudprovider_azure_tenant_id=${var.tenant_id}
+openshift_cloudprovider_azure_subscription_id=${var.subscription_id}
+openshift_cloudprovider_azure_resource_group=${var.group_name}
+openshift_cloudprovider_azure_location=${var.location}
+
+# host group for masters
+[masters]
+${join("\n",azurerm_virtual_machine.k8s-master-vm.*.name )}
+
+# host group for etcd
+[etcd]
+${join("\n",azurerm_virtual_machine.k8s-master-vm.*.name)}
+
+# host group for nodes, includes region info
+[nodes]
+${join("\n",formatlist("%s openshift_node_group_name=node-config-master", azurerm_virtual_machine.k8s-master-vm.*.name)}
+${join("\n",formatlist("%s openshift_node_group_name='node-config-compute'", azurerm_virtual_machine.k8s-node-vm.*.name)}
+EOF
+
+}
 
 # resource "null_resource" "k8s_build_cluster" {
 #   count = 1
