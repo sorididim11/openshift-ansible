@@ -37,3 +37,7 @@ output "slave-privateip" {
 output "master-lb-public-ip" {
     value = "${azurerm_public_ip.k8s-master-publicip.ip_address}"
 }
+
+output "master-lb-fqdn" {
+    value = "${azurerm_public_ip.k8s-master-publicip.fqdn}"
+}

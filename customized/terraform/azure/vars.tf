@@ -7,6 +7,15 @@ variable "client_secret" {}
 
 variable "tenant_id" {}
 
+variable "location" {
+  default = "westus"
+}
+
+
+variable "domain_name_label" {
+  default = "openshift"
+}
+
 variable "group_name" {
   default = "okd"
 }
@@ -41,9 +50,6 @@ variable "num_masters" { default = "1" }
 variable "ansible_inventory_home" { default = "../../../inventory" }
 
 
-variable "location" {
-  default = "westus"
-}
 
 # 크기 	vCPU 	메모리: GiB 	임시 저장소(SSD) GiB 	최대 데이터 디스크 수 	최대 캐시된 임시 저장소 처리량: IOPS/MBps(GiB 단위의 캐시 크기) 	최대 캐시되지 않은 디스크 처리량: IOPS/MBps 	최대 NIC 수 / 예상 네트워크 대역폭(Mbps)
 # Standard_DS1_v2 	1 	3.5 	7 	4 	4,000/32(43) 	3,200/48 	2 / 750

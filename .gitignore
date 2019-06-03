@@ -26,5 +26,6 @@ multi_ec2.yaml
 cover/
 
 .terraform*
+terraform.tfvars
 terraform.tfstate*
 ansible.pem

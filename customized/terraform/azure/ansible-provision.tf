@@ -41,9 +41,8 @@ resource "null_resource" "ansible_host_provision" {
       #"sudo rpm -ivh http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm", 
       "sudo yum install  -y git python-devel gcc", 
       "wget https://bootstrap.pypa.io/get-pip.py && sudo python get-pip.py 'pip==9.0.3' ",
-      "git clone https://github.com/sorididim11/openshift-ansible",
-      "cd openshift-ansible && git checkout kin",
-      "sudo pip install  -r  requirements.txt"
+      "git clone https://github.com/sorididim11/openshift-ansible -b kin -depth 1",
+      "cd openshift-ansible && sudo pip install  -r  requirements.txt"
     ]
   }
 }
@@ -66,6 +65,9 @@ ansible_become=true
 openshift_deployment_type=origin
 openshift_disable_check=disk_availability,docker_storage,memory_availability
 
+openshift_master_cluster_public_hostname=${azurerm_public_ip.k8s-master-publicip.fqdn}
+
+# for azure
 openshift_cloudprovider_kind=azure
 openshift_cloudprovider_azure_client_id=${var.client_id}
 openshift_cloudprovider_azure_client_secret=${var.client_secret}
@@ -73,6 +75,8 @@ openshift_cloudprovider_azure_tenant_id=${var.tenant_id}
 openshift_cloudprovider_azure_subscription_id=${var.subscription_id}
 openshift_cloudprovider_azure_resource_group=${var.group_name}
 openshift_cloudprovider_azure_location=${var.location}
+
+openshift_console_hostname=console.${azurerm_public_ip.k8s-master-publicip.fqdn}
 
 # host group for masters
 [masters]
@@ -110,9 +114,10 @@ resource "null_resource" "openshift_build_cluster" {
 
 # copy private key to master[0] for ansible
   provisioner "remote-exec" {
-    inline = [ 
-      "ansible-playbook openshift-ansible/playbooks/prerequisites.yml",
-      "ansible-playbook openshift-ansible/playbooks/deploy_cluster.yml"
+    inline = [
+      "cd openshift-ansible",
+      "ansible-playbook playbooks/prerequisites.yml",
+      "ansible-playbook playbooks/deploy_cluster.yml"
     ]
   }
 

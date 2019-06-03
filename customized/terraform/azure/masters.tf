@@ -64,9 +64,6 @@ resource "azurerm_network_interface" "k8s-master-nic" {
     subnet_id                               = "${azurerm_subnet.k8s-master-subnet.id}"
     private_ip_address_allocation           = "dynamic"
   }
-	tags {
-		environment = "k8s-test" 
-	}
 }
 
 resource "azurerm_network_interface_backend_address_pool_association" "nic-address-pool-assoc" {
@@ -90,10 +87,6 @@ resource "azurerm_storage_account" "k8s-storage-account" {
 	resource_group_name = "${azurerm_resource_group.k8sgroup.name}"
 	account_replication_type = "LRS"
 	account_tier = "Standard"
-
-	tags {
-		environment = "k8s-test" 
-	}
 }
 
 
@@ -141,10 +134,6 @@ resource "azurerm_virtual_machine" "k8s-master-vm" {
 	boot_diagnostics {
 		enabled = "true"
 		storage_uri = "${azurerm_storage_account.k8s-storage-account.primary_blob_endpoint}"
-	}
-
-	tags {
-		environment = "k8s-test"
 	}
 }
 

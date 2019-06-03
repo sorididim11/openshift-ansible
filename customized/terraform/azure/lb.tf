@@ -8,7 +8,7 @@ resource "azurerm_public_ip" "k8s-master-publicip" {
   location            = "${var.location}"
 
   allocation_method = "Static"
-  #domain_name_label            = "${var.domain_name_label}"
+  domain_name_label            = "${var.domain_name_label}"
 }
 
 

@@ -54,10 +54,6 @@ resource "azurerm_network_interface" "k8s-slave-nic" {
 		#public_ip_address_id = "${element(azurerm_public_ip.k8s-slave-public-ip.*.id,count.index)}"
 	#	load_balancer_backend_address_pools_ids = ["${azurerm_lb_backend_address_pool.lb-backend-pool.id}"]
 	}
-
-	tags {
-		environment = "k8s-test" 
-	}
 }
 
 
@@ -102,10 +98,6 @@ resource "azurerm_virtual_machine" "k8s-node-vm" {
 			path = "/home/${var.admin_username}/.ssh/authorized_keys"
 			key_data = "${chomp(tls_private_key.ansible_key.public_key_openssh)}"
 		}
-	}
-
-	tags {
-		environment = "k8s-test"
 	}
 }
 

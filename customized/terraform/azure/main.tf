@@ -2,7 +2,7 @@ provider "azurerm" {
 	subscription_id = "${var.subscription_id}"
 	client_id       = "${var.client_id}"
 	client_secret   = "${var.client_secret}"
-    tenant_id       = "${var.tenant_id}"
+  tenant_id       = "${var.tenant_id}"
 }
 
 
@@ -10,10 +10,6 @@ provider "azurerm" {
 resource "azurerm_resource_group" "k8sgroup" {
 	name = "${var.group_name}"
 	location = "${var.location}"
-	
-	tags {
-		environment = "k8s-test" 
-	}
 }
 
 
@@ -37,9 +33,5 @@ resource "azurerm_virtual_network" "k8s-network" {
 	address_space = ["${var.vnet_cidr}"]
 	location = "${var.location}"
 	resource_group_name = "${azurerm_resource_group.k8sgroup.name}"
-
-	tags {
-		environment = "k8s-test" 
-	}
 }
 
